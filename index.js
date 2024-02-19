@@ -2,9 +2,7 @@ var express = require('express');
 var cors = require('cors');
 require('dotenv').config();
 require('dotenv').config();
-let bodyParser = require('body-parser');
-let mongoose = require('mongoose');
-
+let formidable = require('formidable');
 var app = express();
 
 //basic configuration
@@ -20,9 +18,18 @@ app.listen(port, function () {
   console.log('Your app is listening on port ' + port);
 });
 
-const urlencodedParser = bodyParser.urlencoded({ extended: false });
-app.use(urlencodedParser);
-
-mongoose.connect(process.env.MONGO_URI);
-
 //app functions start here
+app.post('/api/fileanalyse', async (req, res, next) => {
+  const form = formidable.formidable({});
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      next(err);
+      return;
+    }
+    console.log({ fields, files });
+    const size = files.upfile[0].size;
+    const type = files.upfile[0].mimetype;
+    const name = files.upfile[0].originalFilename;
+    res.json({ name, type, size });
+  });
+});
